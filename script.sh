@@ -2,7 +2,7 @@
 
 url=$1
 maindir="$(pwd)"
-cachedir="$maindir/cache"
+cachedir="$maindir/_cache"
 serverdir="$maindir/server"
 safefiles="allowlist.json config development_behavior_packs development_resource_packs permissions.json server.properties worlds"
 missing_count=0
@@ -15,6 +15,10 @@ fi
 if [ ! -d $serverdir ]; then
 	echo "Server folder does not exist!"
 	exit 1
+fi
+if [ -d $cachedir ]; then
+    echo "Server is in the middle of an update!"
+    exit 1
 fi
 
 for item in $safefiles; do
@@ -40,7 +44,7 @@ mkdir -p $cachedir
 for item in $safefiles; do
     if [ -e "$serverdir/$item" ]; then
         echo "Backing up $item..."
-        cp -ri $serverdir/$item $cachedir/ || exit 1
+        cp -r $serverdir/$item $cachedir/ || exit 1
     fi
 done
 
@@ -55,7 +59,7 @@ unzip -q $serverdir/server.zip -d $serverdir/
 rm $serverdir/server.zip
 
 echo "Copying saved files back into $serverdir"
-cp -ri $cachedir/* $serverdir/
+cp -r $cachedir/* $serverdir/
 
 echo "Removing cache directory..."
 rm -rf $cachedir
